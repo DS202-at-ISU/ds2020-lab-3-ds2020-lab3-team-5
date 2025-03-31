@@ -1,4 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/orjN5TIA)
 
 <!-- README.md is generated from README.Rmd. Please edit the README.Rmd file -->
 
@@ -77,6 +76,95 @@ Similarly, deal with the returns of characters.
 Based on these datasets calculate the average number of deaths an
 Avenger suffers.
 
+``` r
+# Create the deaths dataset in long format
+deaths <- av %>%
+  select(URL, Name.Alias, Death1, Death2, Death3, Death4, Death5) %>%
+  pivot_longer(
+    cols = starts_with("Death"),
+    names_to = "Time",
+    values_to = "Death"
+  ) %>%
+  mutate(
+    Time = readr::parse_number(Time)
+  )
+
+# Display the first few rows of the deaths dataset
+head(deaths)
+```
+
+    ## # A tibble: 6 × 4
+    ##   URL                                                Name.Alias       Time Death
+    ##   <chr>                                              <chr>           <dbl> <chr>
+    ## 1 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonatha…     1 "YES"
+    ## 2 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonatha…     2 ""   
+    ## 3 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonatha…     3 ""   
+    ## 4 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonatha…     4 ""   
+    ## 5 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonatha…     5 ""   
+    ## 6 http://marvel.wikia.com/Janet_van_Dyne_(Earth-616) "Janet van Dyn…     1 "YES"
+
+## Restructuring Returns Data to Long Format
+
+Similarly, let’s reshape the Return columns into a long format dataset:
+
+``` r
+# Create the returns dataset in long format
+returns <- av %>%
+  select(URL, Name.Alias, Return1, Return2, Return3, Return4, Return5) %>%
+  pivot_longer(
+    cols = starts_with("Return"),
+    names_to = "Time",
+    values_to = "Return"
+  ) %>%
+  mutate(
+    Time = readr::parse_number(Time)
+  )
+
+# Display the first few rows of the returns dataset
+head(returns)
+```
+
+    ## # A tibble: 6 × 4
+    ##   URL                                                Name.Alias      Time Return
+    ##   <chr>                                              <chr>          <dbl> <chr> 
+    ## 1 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonath…     1 "NO"  
+    ## 2 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonath…     2 ""    
+    ## 3 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonath…     3 ""    
+    ## 4 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonath…     4 ""    
+    ## 5 http://marvel.wikia.com/Henry_Pym_(Earth-616)      "Henry Jonath…     5 ""    
+    ## 6 http://marvel.wikia.com/Janet_van_Dyne_(Earth-616) "Janet van Dy…     1 "YES"
+
+## Calculating Average Number of Deaths per Avenger
+
+Now, let’s calculate the average number of deaths an Avenger suffers,
+correctly accounting for those with zero deaths:
+
+``` r
+# Count deaths for each character
+death_counts <- deaths %>%
+  filter(Death == "YES") %>%
+  group_by(URL, Name.Alias) %>%
+  summarise(death_count = n(), .groups = "drop")
+
+# Get the full list of all Avengers
+all_avengers <- av %>%
+  select(URL, Name.Alias) %>%
+  distinct()
+
+# Join the death counts with all avengers to include those with zero deaths
+complete_death_counts <- all_avengers %>%
+  left_join(death_counts, by = c("URL", "Name.Alias")) %>%
+  mutate(death_count = replace_na(death_count, 0))
+
+# Calculate the average number of deaths per Avenger
+avg_deaths <- mean(complete_death_counts$death_count)
+
+# Print the result
+cat("The average number of deaths per Avenger is:", round(avg_deaths, 2))
+```
+
+    ## The average number of deaths per Avenger is: 0.51
+
 ## Individually
 
 For each team member, copy this part of the report.
@@ -86,19 +174,43 @@ Each team member picks one of the statements in the FiveThirtyEight
 and fact checks it based on the data. Use dplyr functionality whenever
 possible.
 
+### Harsh’s Work:
+
 ### FiveThirtyEight Statement
 
-> Quote the statement you are planning to fact-check.
+“Out of 173 listed Avengers, my analysis found that 69 had died at least
+one time after they joined the team.5 That’s about 40 percent of all
+people who have ever signed on to the team. Let’s put it this way: If
+you fall from four or five stories up, there’s a 50 percent chance you
+die. Getting a membership card in the Avengers is roughly like jumping
+off a four-story building”
 
 ### Include the code
 
-Make sure to include the code to derive the (numeric) fact for the
-statement
+``` r
+# Count the number of Avengers with each number of deaths
+death_distribution <- complete_death_counts %>%
+  count(death_count) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+# Display the distribution
+death_distribution
+```
+
+    ##   death_count   n percentage
+    ## 1           0 104 60.1156069
+    ## 2           1  53 30.6358382
+    ## 3           2  14  8.0924855
+    ## 4           3   1  0.5780347
+    ## 5           5   1  0.5780347
 
 ### Include your answer
 
 Include at least one sentence discussing the result of your
 fact-checking endeavor.
+
+60% of the Avengers haven’t died once, directly oposing what they have
+said that 69% have died at least once.
 
 Upload your changes to the repository. Discuss and refine answers as a
 team.
