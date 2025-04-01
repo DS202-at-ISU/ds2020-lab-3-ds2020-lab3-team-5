@@ -156,6 +156,9 @@ no_return_first_death <- first_three_death_list %>%
 #Calculate how many of the characters return after their first death
 return_first_death_percent <- (1 - no_return_first_death / nrow(first_three_death_list)) * 100
 
+#display the data
+return_first_death_percent
+
 #Characters who died twice
 has_second_death <- first_three_death_list %>%
   filter(Death2 == "YES")
@@ -176,6 +179,9 @@ third_return <- has_third_death %>%
 
 #Number of characters who returned from a 2nd and/or 3rd death divided by the number of characters who had a 2nd or 3rd death
 return_later_percent <- (second_return + third_return) / ((nrow(has_second_death) + nrow(has_third_death)))
+
+#display the data
+return_later_percent
 ```
 ### Include your answer
 

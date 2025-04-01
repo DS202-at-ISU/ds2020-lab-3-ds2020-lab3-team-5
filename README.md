@@ -212,5 +212,81 @@ fact-checking endeavor.
 60% of the Avengers haven’t died once, directly oposing what they have
 said that 69% have died at least once.
 
-Upload your changes to the repository. Discuss and refine answers as a
-team.
+### Aiden’s Work:
+
+### FiveThirtyEight Statement
+
+“I counted 89 total deaths — some unlucky Avengers are basically Meat
+Loaf with an E-ZPass — and on 57 occasions the individual made a
+comeback. Maybe they didn’t actually die and were secretly in the
+Microverse, or they stayed on Franklin Richards‘s or the Scarlet Witch‘s
+good side in life, or they were dragged back into Avenging by the Chaos
+King or the Grim Reaper, or perhaps a colleague made a deal with time
+travelers. Who knows!”
+
+“But you can only tempt death so many times. There’s a 2-in-3 chance
+that a member of the Avengers returned from their first stint in the
+afterlife, but only a 50 percent chance they recovered from a second or
+third death.8”
+
+### Include the code
+
+``` r
+#Create a list of all the characters with at least one death
+first_three_death_list <- av %>%
+  select(URL, Name.Alias, Death1, Return1, Death2, Return2, Death3, Return3) %>%
+  filter(Death1 == "YES")
+
+#Filter out all the people that don't return after their first death
+no_return_first_death <- first_three_death_list %>%
+  filter(Return1 == "NO") %>%
+  nrow()
+
+#Calculate how many of the characters return after their first death
+return_first_death_percent <- (1 - no_return_first_death / nrow(first_three_death_list)) * 100
+
+#display the data
+return_first_death_percent
+```
+
+    ## [1] 66.66667
+
+``` r
+#Characters who died twice
+has_second_death <- first_three_death_list %>%
+  filter(Death2 == "YES")
+
+#Characters who died 3 times
+has_third_death <- first_three_death_list %>%
+  filter(Death3 == "YES")
+
+#Number of characters who returned from their second death
+second_return <- has_second_death %>%
+  filter(Return2 == "YES") %>%
+  nrow()
+
+#Number of characters who returned from their third death
+third_return <- has_third_death %>%
+  filter(Return3 == "YES") %>%
+  nrow()
+
+#Number of characters who returned from a 2nd and/or 3rd death divided by the number of characters who had a 2nd or 3rd death
+return_later_percent <- (second_return + third_return) / ((nrow(has_second_death) + nrow(has_third_death)))
+
+#display the data
+return_later_percent
+```
+
+    ## [1] 0.5
+
+### Include your answer
+
+Include at least one sentence discussing the result of your
+fact-checking endeavor.
+
+The first statement that there is a 2 in 3 chance that characters return
+after their 3rd death checked out, my data also got 66.66% of characters
+returning. The second statement that there is only a 50% chance of
+recovery from a 2nd or 3rd death was also accurate in my findings, with
+exactly 50% of 2nd or 3rd deaths being returned from. Overall in this
+section they were accurate based on my findings.
